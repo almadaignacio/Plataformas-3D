@@ -17,10 +17,13 @@ public class Lever : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
-        if (Input.GetKeyDown(KeyCode.E))
+        if (other.tag == "Player")
+        {
+            if (Input.GetKeyDown(KeyCode.E))
             {
             Door.SetActive(true);
             }
+        }
     }
 
 
