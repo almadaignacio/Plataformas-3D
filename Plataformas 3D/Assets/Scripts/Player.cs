@@ -14,6 +14,8 @@ public class Player : MonoBehaviour
 
     public float jumpValue;
 
+    public SceneController sceneControl;
+
     CharacterController character;
     Rigidbody rb;
     Vector3 moveVector;
@@ -23,6 +25,7 @@ public class Player : MonoBehaviour
     float horizontalInput;
 
     bool Is_Grounded;
+  
 
     public float speed;
     Vector3 movement;
@@ -36,6 +39,7 @@ public class Player : MonoBehaviour
     void Start()
     {
         Is_Grounded = true;
+        Cursor.lockState = CursorLockMode.Locked;
     }
 
     // Update is called once per frame
@@ -92,6 +96,16 @@ public class Player : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             Is_Grounded = true;
+        }
+
+        if (collision.gameObject.CompareTag("Water"))
+        {
+            sceneControl.ChangeLevel(2);
+        }
+
+        if (collision.gameObject.CompareTag("Victory"))
+        {
+            sceneControl.ChangeLevel(3);
         }
     }
 }

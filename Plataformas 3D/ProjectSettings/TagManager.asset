@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Water
+  - Victory
+  - Lever
   layers:
   - Default
   - TransparentFX
