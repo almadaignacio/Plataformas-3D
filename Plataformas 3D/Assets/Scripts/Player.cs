@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Player : MonoBehaviour
@@ -25,7 +26,8 @@ public class Player : MonoBehaviour
     float horizontalInput;
 
     bool Is_Grounded;
-  
+
+    [SerializeField] Animator playerAnimator;
 
     public float speed;
     Vector3 movement;
@@ -40,6 +42,7 @@ public class Player : MonoBehaviour
     {
         Is_Grounded = true;
         Cursor.lockState = CursorLockMode.Locked;
+        Cam = Camera.main.GetComponent<Transform>();
     }
 
     // Update is called once per frame
@@ -52,11 +55,15 @@ public class Player : MonoBehaviour
         rb.MovePosition(transform.position + movement);
         */
         RotatePlayer();
-        
+
+        float ymouse = Input.GetAxis("Mouse Y") * Time.deltaTime * Sensitivity;
+
         bool forward = Input.GetKeyDown(KeyCode.W);
         bool back = Input.GetKeyDown(KeyCode.S);
         bool left = Input.GetKeyDown(KeyCode.A);
         bool right = Input.GetKeyDown(KeyCode.D);
+        bool jump = Input.GetKeyDown(KeyCode.Space);
+
 
         playerDirection = Vector3.zero;
         //Elegimos una dirección en función de la tecla que se mantiene presionada.
@@ -66,7 +73,20 @@ public class Player : MonoBehaviour
         if (Input.GetKey(KeyCode.A)) playerDirection += Vector3.left;
         //Nos movemos solo si hay una dirección diferente que vector zero.
         if (playerDirection != Vector3.zero) MovePlayer(playerDirection);
+
+        if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
+        {
+            if (forward) playerAnimator.SetTrigger("FORWARD");
+        }
+
         
+        if (jump) playerAnimator.SetTrigger("JUMP");
+
+        if (Input.GetKeyUp(KeyCode.W) || Input.GetKeyUp(KeyCode.S) || Input.GetKeyUp(KeyCode.A) || Input.GetKeyUp(KeyCode.D))
+        {
+            if (!IsAnimation("IDLE")) playerAnimator.SetTrigger("IDLE");
+        }
+
         if (Input.GetKeyDown(KeyCode.Space) && Is_Grounded == true)
         {
             Jump();
@@ -80,15 +100,23 @@ public class Player : MonoBehaviour
 
     public void RotatePlayer()
     {
-        cameraAxisX += Input.GetAxis("Mouse X");
-        Quaternion newRotation = Quaternion.Euler(0, cameraAxisX, 0);
-        transform.rotation = Quaternion.Lerp(transform.rotation, newRotation, 2f * Time.deltaTime);
+        float xmouse = Input.GetAxis("Mouse X") * Time.deltaTime * Sensitivity;
+        float ymouse = Input.GetAxis("Mouse Y") * Time.deltaTime * Sensitivity;
+        transform.Rotate(Vector3.up * xmouse);
+        yRotation -= ymouse;
+        yRotation = Mathf.Clamp(yRotation, -85f, 60f);
+        Cam.localRotation = Quaternion.Euler(yRotation, 0, 0);
     }
 
     public void Jump()
     {
         Is_Grounded = false;
         rb.AddForce(0, jumpValue, 0, ForceMode.Impulse);
+    }
+
+    private bool IsAnimation(string animName)
+    {
+        return playerAnimator.GetCurrentAnimatorStateInfo(0).IsName(animName);
     }
 
     private void OnCollisionEnter(Collision collision)
